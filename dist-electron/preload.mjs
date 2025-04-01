@@ -1,5 +1,6 @@
 "use strict";
 const electron = require("electron");
+const fs = require("fs/promises");
 electron.contextBridge.exposeInMainWorld("api", {
   on(...args) {
     const [channel, listener] = args;
@@ -17,5 +18,10 @@ electron.contextBridge.exposeInMainWorld("api", {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
   },
-  safeQuery: (sql, params = []) => electron.ipcRenderer.invoke("database:query", { sql, params })
+  safeQuery: (sql, params = []) => electron.ipcRenderer.invoke("database:query", { sql, params }),
+  showOpenDialog: (options) => electron.ipcRenderer.invoke("dialog:openFile", options),
+  readFile: (filePath, encoding = "utf-8") => fs.readFile(filePath, encoding)
+  // writeToClipboard: (text:string) => {
+  //   return ipcRenderer.invoke('writeToClipboard', text);
+  // }
 });

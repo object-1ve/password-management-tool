@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "better-sqlite3": "^11.9.1",
-    "element-plus": "^2.9.7",
     "vue": "^3.4.21"
   },
   "devDependencies": {
@@ -19,6 +19,7 @@
     "electron": "^30.5.1",
     "electron-builder": "^24.13.3",
     "electron-rebuild": "^3.2.9",
+    "naive-ui": "^2.41.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",

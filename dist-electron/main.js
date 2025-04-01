@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -24,7 +24,9 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs")
+      preload: path.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
     }
   });
   win.webContents.on("did-finish-load", () => {
@@ -44,10 +46,14 @@ function createDatabase() {
     const db = new Database(dbPath);
     console.log("Connected to the SQLite database using better-sqlite3.");
     db.exec(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        url TEXT,
+        remark TEXT,
+        updateTime TEXT NOT NULL,
+        createTime TEXT NOT NULL
       )
     `);
     console.log("Table created or already exists");
@@ -89,6 +95,9 @@ ipcMain.handle("database:query", async (event, { sql, params = [] }) => {
     console.error("Database query error:", error.message);
     return Promise.reject(error);
   }
+});
+ipcMain.handle("dialog:openFile", async (event, options) => {
+  return await dialog.showOpenDialog(options);
 });
 export {
   MAIN_DIST,

@@ -1,4 +1,5 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { ipcRenderer, contextBridge,clipboard } from 'electron'
+import fs from 'fs/promises'
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('api', {
@@ -18,5 +19,12 @@ contextBridge.exposeInMainWorld('api', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
-  safeQuery: (sql: string, params: any[] = []) => ipcRenderer.invoke('database:query', { sql, params })
+  safeQuery: (sql: string, params: any[] = []) => ipcRenderer.invoke('database:query', { sql, params }),
+  showOpenDialog: (options: Electron.OpenDialogOptions) => 
+    ipcRenderer.invoke('dialog:openFile', options),
+  readFile: (filePath: string, encoding: BufferEncoding = 'utf-8') => 
+    fs.readFile(filePath, encoding),
+  // writeToClipboard: (text:string) => {
+  //   return ipcRenderer.invoke('writeToClipboard', text);
+  // }
 })

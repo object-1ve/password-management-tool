@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain,clipboard,dialog } from 'electron';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -30,6 +30,8 @@ function createWindow() {
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
+      nodeIntegration: true,
+      contextIsolation: true
     },
   });
 
@@ -57,10 +59,14 @@ function createDatabase(): void {
 
     // 创建表
     db.exec(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        url TEXT,
+        remark TEXT,
+        updateTime TEXT NOT NULL,
+        createTime TEXT NOT NULL
       )
     `);
     console.log('Table created or already exists');
@@ -109,3 +115,9 @@ ipcMain.handle('database:query', async (event, { sql, params = [] }: { sql: stri
     return Promise.reject(error);
   }
 });
+// ipcMain.handle('writeToClipboard', (event, text) => {
+//   clipboard.writeText(text);
+// });
+ipcMain.handle('dialog:openFile', async (event, options) => {
+  return await dialog.showOpenDialog(options)
+})
