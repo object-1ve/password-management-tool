@@ -1,10 +1,10 @@
-import { app, BrowserWindow, ipcMain,clipboard,dialog } from 'electron';
-import { createRequire } from 'node:module';
+import { app, BrowserWindow, ipcMain,dialog } from 'electron';
+// import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 
-const require = createRequire(import.meta.url);
+// const require = createRequire(import.meta.url);
 // const __filename = fileURLToPath(import.meta.url); // Add this line
 // const __dirname = path.dirname(__filename); // Modify this line to use __filename
 // process.env.APP_ROOT = path.join(__dirname, '..');
@@ -98,7 +98,7 @@ app.whenReady().then(() => {
   createDatabase(); // Ensure database is created when the app is ready
 });
 
-ipcMain.handle('database:query', async (event, { sql, params = [] }: { sql: string; params?: any[] }) => {
+ipcMain.handle('database:query', async (_, { sql, params = [] }: { sql: string; params?: any[] }) => {
   try {
     const db = new Database(dbPath);
     if (sql.trim().toLowerCase().startsWith('select')) {
@@ -118,6 +118,6 @@ ipcMain.handle('database:query', async (event, { sql, params = [] }: { sql: stri
 // ipcMain.handle('writeToClipboard', (event, text) => {
 //   clipboard.writeText(text);
 // });
-ipcMain.handle('dialog:openFile', async (event, options) => {
+ipcMain.handle('dialog:openFile', async (_, options) => {
   return await dialog.showOpenDialog(options)
 })

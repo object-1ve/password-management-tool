@@ -5,6 +5,7 @@ import './style.css'
 import App from './App.vue'
 // import naive from 'naive-ui'
 // import ElementPlus from 'element-plus'
+// require('update-electron-app')()
 
 const app = createApp(App)
 app.mount('#app')

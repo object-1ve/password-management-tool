@@ -23,6 +23,24 @@ module.exports = {
       name: '@electron-forge/maker-rpm',
       config: {},
     },
+    {
+      name: 'electron-wix-msi',
+      config: {
+        appDirectory: path.join(process.env.APP_ROOT, 'out', 'electron-0331-win32-x64'),
+        outputDirectory: path.join(process.env.APP_ROOT, 'out', 'msi'),
+        name: 'electron-0331',
+        manufacturer: 'yzzob',
+        description: '密码管理工具',
+        exe: 'electron-0331.exe',
+        icon: path.join(process.env.VITE_PUBLIC, 'logo.ico'),
+        ui: {
+          chooseDirectory: true
+        },
+        features: {
+          autoUpdate: false
+        }
+      }
+    }
   ],
   publishers: [
     {

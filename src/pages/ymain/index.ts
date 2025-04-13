@@ -119,7 +119,7 @@ export async function insertPasswordFromTextFile(passwordData:{
     createTime?: string
 }) {
     try {
-    const timestamp = getLocalTimestamp();  // 使用新时间格式
+    // const timestamp = getLocalTimestamp();  // 使用新时间格式
     
     const result = await (window as any).api.safeQuery(
         `INSERT INTO passwords 

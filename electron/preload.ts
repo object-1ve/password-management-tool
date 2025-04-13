@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge,clipboard } from 'electron'
+import { ipcRenderer, contextBridge } from 'electron'
 import fs from 'fs/promises'
 
 // --------- Expose some API to the Renderer process ---------
