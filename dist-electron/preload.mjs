@@ -20,8 +20,7 @@ electron.contextBridge.exposeInMainWorld("api", {
   },
   safeQuery: (sql, params = []) => electron.ipcRenderer.invoke("database:query", { sql, params }),
   showOpenDialog: (options) => electron.ipcRenderer.invoke("dialog:openFile", options),
-  readFile: (filePath, encoding = "utf-8") => fs.readFile(filePath, encoding)
-  // writeToClipboard: (text:string) => {
-  //   return ipcRenderer.invoke('writeToClipboard', text);
-  // }
+  readFile: (filePath, encoding = "utf-8") => fs.readFile(filePath, encoding),
+  writeFile: (filePath, data, encoding = "utf-8") => fs.writeFile(filePath, data, encoding),
+  showSaveDialog: (options) => electron.ipcRenderer.invoke("dialog:saveFile", options)
 });

@@ -110,6 +110,12 @@ export async function importFromTxtFile(filePath: string) {
     const content = await (window as any).api.readFile(filePath, 'utf-8')
     return content
 }
+
+export async function exportToTxtFile(filePath: string,content: string) {
+    await (window as any).api.writeFile(filePath, content , 'utf-8')
+    return null
+}
+
 export async function insertPasswordFromTextFile(passwordData:{
     username: string,
     password: string,
@@ -142,6 +148,7 @@ export async function insertPasswordFromTextFile(passwordData:{
     throw error;
     }
 }
+
 // export async function writeToClipboard(text: string) {
 //     try {
 //         await (window as any).api.writeToClipboard(text);

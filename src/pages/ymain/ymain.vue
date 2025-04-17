@@ -6,7 +6,8 @@ import {
     deletePassword as deletePasswordApi,
     updatePassword as updatePasswordApi,
     importFromTxtFile,
-    insertPasswordFromTextFile
+    insertPasswordFromTextFile,
+    exportToTxtFile
     // writeToClipboard
 } from './index'
 
@@ -111,59 +112,44 @@ const editPassword = () => {
     showAddPasswordWindow.value = true
     isEditing.value = true
     contextMenuVisible.value = false
+}
 
-    // window.scrollTo({
-    //     top: 10,
-    //     left: 0, 
-    // })
+const exportPassword = async () => {    
+    try {
+        // 1. 使用showSaveDialog而不是showOpenDialog
+        const { filePath } = await (window as any).api.showSaveDialog({
+            title: '保存密码记录',
+            filters: [{ name: 'Text Files', extensions: ['txt'] }]
+        })
+
+        if (!filePath) return
+
+        let content = '';
+        passwordList.value.forEach(password => {
+            content += [
+                password.username,
+                password.password,
+                password.url,
+                password.remark,
+                password.updateTime,
+                password.createTime
+            ].join('\t') + '\n';
+        });
+        exportToTxtFile(filePath, content)
+        
+        alert('导出成功')
+    } catch (error) {
+        console.error('导出失败:', error)
+        alert('导出失败')
+    } finally {
+        contextMenuVisible.value = false
+    }
 }
 
 const handleClickOutside = () => {
     contextMenuVisible.value = false
 }
-// const clickedCellText = ref<string | null>(null) // New ref to store text of the clicked cell
 
-// const copy = async () => {
-//     // Get the text stored from the right-click event
-//     const textToCopy = clickedCellText.value;
-
-//     // Ensure there is text to copy
-//     if (typeof textToCopy !== 'string' || textToCopy.trim() === '') {
-//         console.warn('No text content found in the clicked cell to copy.');
-//         contextMenuVisible.value = false; // Hide context menu
-//         return;
-//     }
-
-//     try {
-//         // Use the imported writeToClipboard function from './index.ts'
-//         // This assumes './index.ts' correctly exports a function that calls
-//         // the Electron clipboard API (like window.api.writeToClipboard)
-//         await writeToClipboard(textToCopy);
-//         console.log(`Copied "${textToCopy}" to clipboard!`);
-//         // Optional: Show a success message to the user
-
-//     } catch (error) {
-//         console.error('Failed to copy text to clipboard:', error);
-//         // Optional: Show an error message to the user
-//     } finally {
-//         // Always hide the context menu and clear the stored text
-//         contextMenuVisible.value = false;
-//         clickedCellText.value = null;
-//     }
-// }
-const formatDateTime = (dateTimeStr: string) => {
-    if (!dateTimeStr) return ''
-
-    // 处理 2025/4/1 18:20:38 这样的格式
-    const [datePart, timePart] = dateTimeStr.split(' ')
-    const [year, month, day] = datePart.split('/')
-
-    // 补零处理
-    const padZero = (num: string) => num.padStart(2, '0')
-    const formattedDate = `${year}-${padZero(month)}-${padZero(day)}`
-
-    return timePart ? `${formattedDate} ${timePart}` : formattedDate
-}
 const importFromTxt = async () => {
     try {
         // 1. 打开文件选择对话框
@@ -180,21 +166,28 @@ const importFromTxt = async () => {
 
         // 3. 解析并导入每条记录
         let successCount = 0
-        for (const line of lines) {
+        for (const [index, line] of lines.entries()) {
             try {
-                const [username, password, url, remark, updateTime, createTime] = line.split('\t')
+                // 严格检查每行必须有6个字段
+                const fields = line.split('\t').map(f => f.trim())
+                if (fields.length !== 6) {
+                    console.error(`第${index + 1}行格式错误: 应有6个字段，实际得到${fields.length}个`)
+                    continue
+                }
+
+                const [username, password, url, remark, updateTime, createTime] = fields
 
                 await insertPasswordFromTextFile({
-                    username: username?.trim() || '',
-                    password: password?.trim() || '',
-                    url: url?.trim() || '',
-                    remark: remark ? `${remark.trim()} from text` : 'from text',
-                    updateTime: updateTime ? formatDateTime(updateTime.trim()) : '',
-                    createTime: createTime ? formatDateTime(createTime.trim()) : ''
+                    username: username || '',
+                    password: password || '',
+                    url: url || '',
+                    remark: remark || 'from text',
+                    updateTime: updateTime ? updateTime : '',
+                    createTime: createTime ? createTime : ''
                 })
                 successCount++
             } catch (error) {
-                console.error('导入单条记录失败:', error)
+                console.error(`导入第${index + 1}行失败:`, error)
             }
         }
 
@@ -204,7 +197,7 @@ const importFromTxt = async () => {
 
     } catch (error) {
         console.error('导入失败:', error)
-        alert('导入失败，请检查文件格式')
+        alert('导入失败，请检查文件格式。确保使用制表符分隔字段，每行包含6个字段。')
     }
 }
 
@@ -263,12 +256,13 @@ onUnmounted(() => {
                     <button @click="addPassword" class="button2">{{ isEditing ? '更新' : '添加' }}</button>
                 </template>
                 <button class="button0" @click="importFromTxt">txt导入</button>
+                <button class="button0" @click="exportPassword">导出txt</button>
             </div>
             <div class="search-input-wrapper">
-                <input type="text" v-model="searchKeyword" placeholder="输入关键词搜索" @keyup.enter="search">
-                <button @click="search" class="search-icon-button" >
+                <input type="text" v-model="searchKeyword" placeholder="输入关键词搜索" @input="search">
+                <!-- <button @click="search" class="search-icon-button">
                     <img src="./search.svg" alt="搜索" class="search-icon">
-                </button>
+                </button> -->
             </div>
         </div>
         <div class="add-password-window" v-if="showAddPasswordWindow">
@@ -326,6 +320,7 @@ onUnmounted(() => {
             }" @click.stop>
             <div class="menu-item" @click="deletePassword">删除</div>
             <div class="menu-item" @click="editPassword">编辑</div>
+
             <!-- <div class="menu-item" @click="copy">复制</div> -->
         </div>
     </div>

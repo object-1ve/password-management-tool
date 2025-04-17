@@ -26,7 +26,7 @@ function createWindow() {
     height: 800, // 设置窗口的高度为 800 像素。
     show: false, // 初始时不显示窗口。
     title: "yzzob",
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(process.env.VITE_PUBLIC, 'logo.ico'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -120,4 +120,7 @@ ipcMain.handle('database:query', async (_, { sql, params = [] }: { sql: string; 
 // });
 ipcMain.handle('dialog:openFile', async (_, options) => {
   return await dialog.showOpenDialog(options)
+})
+ipcMain.handle('dialog:saveFile', async(_, options) => {
+  return dialog.showSaveDialog(options)
 })

@@ -24,7 +24,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('dialog:openFile', options),
   readFile: (filePath: string, encoding: BufferEncoding = 'utf-8') => 
     fs.readFile(filePath, encoding),
-  // writeToClipboard: (text:string) => {
-  //   return ipcRenderer.invoke('writeToClipboard', text);
-  // }
+  writeFile: (filePath: string, data: string | NodeJS.ArrayBufferView, encoding: BufferEncoding = 'utf-8') =>
+    fs.writeFile(filePath, data, encoding),
+  showSaveDialog: (options: Electron.SaveDialogOptions) =>
+    ipcRenderer.invoke('dialog:saveFile', options)
 })

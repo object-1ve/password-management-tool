@@ -24,7 +24,7 @@ dist-ssr
 *.sw?
 
 # 数据库文件
-mydb.db
-*.db
-project\electron-0331\mydb.db
+# mydb.db
+# *.db
+# project\electron-0331\mydb.db
 out/
