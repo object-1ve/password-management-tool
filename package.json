@@ -1,0 +1,64 @@
+{
+  "name": "electron-0331",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build && electron-builder",
+    "preview": "vite preview",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "better-sqlite3": "^11.9.1",
+    "electron-squirrel-startup": "^1.0.1",
+    "update-electron-app": "^3.1.1",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.0",
+    "@electron-forge/maker-deb": "^7.8.0",
+    "@electron-forge/maker-rpm": "^7.8.0",
+    "@electron-forge/maker-squirrel": "^7.8.0",
+    "@electron-forge/maker-wix": "^7.8.0",
+    "@electron-forge/maker-zip": "^7.8.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
+    "@electron-forge/plugin-fuses": "^7.8.0",
+    "@electron-forge/publisher-github": "^7.8.0",
+    "@electron/fuses": "^1.8.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "electron": "^30.5.1",
+    "electron-rebuild": "^3.2.9",
+    "naive-ui": "^2.41.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6",
+    "vite-plugin-electron": "^0.28.6",
+    "vite-plugin-electron-renderer": "^0.14.5",
+    "vue-tsc": "^2.0.26"
+  },
+  "main": "dist-electron/main.js",
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "platform": "win32",
+        "arch": "x64",
+        "asar": true
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-wix",
+          "config": {
+            "language": 1033,
+            "manufacturer": "yzzob",
+            "icon": "./public/logo.ico",
+            "windows7Compatibility": true
+          }
+        }
+      ]
+    }
+  }
+}
