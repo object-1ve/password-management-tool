@@ -30,19 +30,21 @@ const openAddPasswordWindow = () => {
     showAddPasswordWindow.value = true
     isEditing.value = false
 }
-
-const loadPasswords = async () => {
+const loadPasswords = async function() {
     try {
-        const passwords = await getPasswords()
-        passwordList.value = passwords || [] // Fallback to empty array if undefined
-        originalPasswordList.value = [...passwordList.value]
-        searchKeyword.value = ''
+        const passwords = await getPasswords();
+        // 按照updateTime降序排列
+        passwordList.value = (passwords || []).sort(function(a: { updateTime: string }, b: { updateTime: string }) {
+            return new Date(b.updateTime).getTime() - new Date(a.updateTime).getTime();
+        });
+        originalPasswordList.value = [...passwordList.value];
+        searchKeyword.value = '';
     } catch (error) {
-        console.error('加载密码失败:', error)
-        passwordList.value = [] // Ensure we have an array even on error
-        originalPasswordList.value = []
+        console.error('加载密码失败:', error);
+        passwordList.value = [];
+        originalPasswordList.value = [];
     }
-}
+};
 
 const handlePasswordRightClick = (event: MouseEvent) => {
     event.preventDefault()
