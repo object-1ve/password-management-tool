@@ -7,10 +7,12 @@ process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-const dbPath = path.join(process.env.APP_ROOT, "mydb.db");
+const dbPath = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "userData", "mydb.db") : path.join(process.env.APP_ROOT, "..", "userData", "mydb.db");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 function createWindow() {
+  console.log("RENDERER_DIST: ", RENDERER_DIST);
+  console.log("VITE_PUBLIC: ", process.env.VITE_PUBLIC);
   win = new BrowserWindow({
     width: 1200,
     // 设置窗口的宽度为 1200 像素。

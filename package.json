@@ -1,14 +1,14 @@
 {
   "name": "electron-0331",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build && electron-builder",
     "preview": "vite preview",
     "start": "electron-forge start",
     "package": "electron-forge package",
+    "build": "vite build && electron-rebuild",
     "make": "electron-forge make"
   },
   "dependencies": {
@@ -42,23 +42,6 @@
   },
   "main": "dist-electron/main.js",
   "config": {
-    "forge": {
-      "packagerConfig": {
-        "platform": "win32",
-        "arch": "x64",
-        "asar": true
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-wix",
-          "config": {
-            "language": 1033,
-            "manufacturer": "yzzob",
-            "icon": "./public/logo.ico",
-            "windows7Compatibility": true
-          }
-        }
-      ]
-    }
+    "forge": "./forge.config.cjs"
   }
 }

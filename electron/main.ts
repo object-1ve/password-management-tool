@@ -4,23 +4,20 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 
-// const require = createRequire(import.meta.url);
-// const __filename = fileURLToPath(import.meta.url); // Add this line
-// const __dirname = path.dirname(__filename); // Modify this line to use __filename
-// process.env.APP_ROOT = path.join(__dirname, '..');
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, '..');
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron');
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist');
-const dbPath = path.join(process.env.APP_ROOT, 'mydb.db');
-
+// const dbPath =getDatabasePath();
+const dbPath = VITE_DEV_SERVER_URL? path.join(process.env.APP_ROOT,'userData', 'mydb.db') :path.join(process.env.APP_ROOT, '..','userData', 'mydb.db');
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST;
-
 let win: BrowserWindow | null;
 
 function createWindow() {
+  console.log('RENDERER_DIST: ', RENDERER_DIST);
+  console.log('VITE_PUBLIC: ', process.env.VITE_PUBLIC);
   win = new BrowserWindow({
     width: 1200, // 设置窗口的宽度为 1200 像素。
     height: 800, // 设置窗口的高度为 800 像素。
@@ -53,6 +50,7 @@ function createWindow() {
 
 function createDatabase(): void {
   try {
+    // const dbPath =getDatabasePath();
     // 创建或打开数据库（如果不存在会自动创建）
     const db = new Database(dbPath);
     console.log('Connected to the SQLite database using better-sqlite3.');
@@ -124,3 +122,4 @@ ipcMain.handle('dialog:openFile', async (_, options) => {
 ipcMain.handle('dialog:saveFile', async(_, options) => {
   return dialog.showSaveDialog(options)
 })
+
