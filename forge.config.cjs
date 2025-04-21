@@ -13,19 +13,6 @@ module.exports = {
   rebuildConfig: {},
   makers: [
     {
-      name: '@electron-forge/maker-squirrel',  // Squirrel.Windows 打包器
-      platforms: ['win32'],
-      config: {
-        name: 'electron-0331',
-        authors: 'yzzob',
-        description: 'password management tool',
-        iconUrl: 'https://raw.githubusercontent.com/yzzob/electron-y/refs/heads/main/public/logo.ico',  
-        setupIcon: path.resolve(__dirname, 'public', 'logo.ico'),
-        noMsi: true,
-        copyright: 'Copyright © 2025 yzzob'
-      }
-    },
-    {
       name: '@electron-forge/maker-wix',      // ✅ 正确的 Wix Maker
       platforms: ['win32'],
       config: {
