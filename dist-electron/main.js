@@ -2,12 +2,13 @@ import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import Database from "better-sqlite3";
+import * as fs from "fs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-const dbPath = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "userData", "mydb.db") : path.join(process.env.APP_ROOT, "..", "userData", "mydb.db");
+const dbPath = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "userData", "mydb.db") : path.join(app.getPath("userData"), "mydb.db");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 function createWindow() {
@@ -43,8 +44,16 @@ function createWindow() {
 }
 function createDatabase() {
   try {
-    const db = new Database(dbPath);
-    console.log("Connected to the SQLite database using better-sqlite3.");
+    const dbName = "mydb.db";
+    const isDev = !!VITE_DEV_SERVER_URL;
+    const targetPath = isDev ? path.join(process.env.APP_ROOT, "userData", dbName) : path.join(app.getPath("userData"), dbName);
+    const sourcePath = isDev ? path.join(process.env.APP_ROOT, "resources", "template.db") : path.join(process.resourcesPath, "template.db");
+    if (!fs.existsSync(targetPath)) {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.copyFileSync(sourcePath, targetPath);
+      console.log("Copied template DB to:", targetPath);
+    }
+    const db = new Database(targetPath);
     db.exec(`
       CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,11 +65,9 @@ function createDatabase() {
         createTime TEXT NOT NULL
       )
     `);
-    console.log("Table created or already exists");
     db.close();
-    console.log("Closed the database connection.");
   } catch (err) {
-    console.error("Error interacting with the database:", err.message);
+    console.error("DB Error:", err.message);
   }
 }
 app.on("window-all-closed", () => {

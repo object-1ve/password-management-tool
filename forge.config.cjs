@@ -5,8 +5,8 @@ module.exports = {
     asar: true,  // 如果不想 asar，就设为 false
     extraResource: [
       path.resolve(__dirname, 'dist'),
-      path.resolve(__dirname, 'public'),
-      path.resolve(__dirname, 'userData')
+      path.resolve(__dirname, 'public')
+      // path.resolve(__dirname, 'userData')
     ],
     icon: path.resolve(__dirname, 'public', 'logo.ico')
   },

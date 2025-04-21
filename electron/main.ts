@@ -3,7 +3,7 @@ import { app, BrowserWindow, ipcMain,dialog } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import Database from 'better-sqlite3';
-
+import * as fs from 'fs'; 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, '..');
@@ -11,7 +11,11 @@ export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron');
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist');
 // const dbPath =getDatabasePath();
-const dbPath = VITE_DEV_SERVER_URL? path.join(process.env.APP_ROOT,'userData', 'mydb.db') :path.join(process.env.APP_ROOT, '..','userData', 'mydb.db');
+// const dbPath = VITE_DEV_SERVER_URL? path.join(process.env.APP_ROOT,'userData', 'mydb.db') :path.join(process.env.APP_ROOT, '..','userData', 'mydb.db');
+const dbPath = VITE_DEV_SERVER_URL
+  ? path.join(process.env.APP_ROOT, 'userData', 'mydb.db')  // 开发模式
+  : path.join(app.getPath('userData'), 'mydb.db');          // 生产模式（打包后）
+// const dbPath = path.join(app.getPath('userData'), 'mydb.db');
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST;
 let win: BrowserWindow | null;
 
@@ -50,12 +54,24 @@ function createWindow() {
 
 function createDatabase(): void {
   try {
-    // const dbPath =getDatabasePath();
-    // 创建或打开数据库（如果不存在会自动创建）
-    const db = new Database(dbPath);
-    console.log('Connected to the SQLite database using better-sqlite3.');
+    const dbName = 'mydb.db';
 
-    // 创建表
+    const isDev = !!VITE_DEV_SERVER_URL;
+    const targetPath = isDev
+      ? path.join(process.env.APP_ROOT, 'userData', dbName)
+      : path.join(app.getPath('userData'), dbName);
+
+    const sourcePath = isDev
+      ? path.join(process.env.APP_ROOT, 'resources', 'template.db')
+      : path.join(process.resourcesPath, 'template.db');
+
+    if (!fs.existsSync(targetPath)) {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.copyFileSync(sourcePath, targetPath);
+      console.log('Copied template DB to:', targetPath);
+    }
+
+    const db = new Database(targetPath);
     db.exec(`
       CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,13 +83,9 @@ function createDatabase(): void {
         createTime TEXT NOT NULL
       )
     `);
-    console.log('Table created or already exists');
-
-    // 关闭数据库连接
     db.close();
-    console.log('Closed the database connection.');
   } catch (err: any) {
-    console.error('Error interacting with the database:', err.message);
+    console.error('DB Error:', err.message);
   }
 }
 
