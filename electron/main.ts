@@ -1,10 +1,9 @@
-import { app, BrowserWindow, ipcMain,dialog } from 'electron';
+import { app, BrowserWindow, ipcMain,dialog ,clipboard} from 'electron';
 // import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import * as fs from 'fs'; 
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, '..');
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
@@ -34,6 +33,7 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: true
     },
+    
   });
 
 
@@ -134,4 +134,6 @@ ipcMain.handle('dialog:openFile', async (_, options) => {
 ipcMain.handle('dialog:saveFile', async(_, options) => {
   return dialog.showSaveDialog(options)
 })
-
+ipcMain.handle('clipboard:writeText', async(_, text) => {
+  return clipboard.writeText(text)
+})

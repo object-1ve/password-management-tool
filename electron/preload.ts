@@ -27,5 +27,7 @@ contextBridge.exposeInMainWorld('api', {
   writeFile: (filePath: string, data: string | NodeJS.ArrayBufferView, encoding: BufferEncoding = 'utf-8') =>
     fs.writeFile(filePath, data, encoding),
   showSaveDialog: (options: Electron.SaveDialogOptions) =>
-    ipcRenderer.invoke('dialog:saveFile', options)
+    ipcRenderer.invoke('dialog:saveFile', options),
+  writeToClipboard: (text: string) =>
+    ipcRenderer.invoke('clipboard:writeText', text)
 })

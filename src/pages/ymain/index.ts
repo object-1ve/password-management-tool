@@ -149,6 +149,17 @@ export async function insertPasswordFromTextFile(passwordData:{
     }
 }
 
+export async function writeToClipboardApi(content: string) {
+    try {
+        await (window as any).api.writeToClipboard(content);
+        console.log('复制成功:', content);
+        return true;
+    }   
+    catch (error) {
+        console.error('插入失败:', error);
+        throw error;
+    }
+}
 // export async function writeToClipboard(text: string) {
 //     try {
 //         await (window as any).api.writeToClipboard(text);

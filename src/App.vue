@@ -19,7 +19,7 @@ const switchView = (view: string) => {
             @click="switchView('home')">
           首页
         </div>
-        <div class="nav-item" 
+        <!-- <div class="nav-item" 
             :class="{ active: currentView === 'passwords' }" 
             @click="switchView('passwords')">
           密码管理
@@ -33,7 +33,7 @@ const switchView = (view: string) => {
             :class="{ active: currentView === 'settings' }" 
             @click="switchView('settings')">
           设置
-        </div>
+        </div> -->
       </nav>
     </div>
     
@@ -41,13 +41,9 @@ const switchView = (view: string) => {
     <div class="content">
       <div v-if="currentView === 'home'">
           <yMain></yMain>
-          <!-- <ytable></ytable> -->
-          <!-- <yy></yy> -->
-          <!-- <button>button1</button> -->
-          <!-- <button>button2</button> -->
       </div>
       
-      <div v-if="currentView === 'passwords'">
+      <!-- <div v-if="currentView === 'passwords'">
         <h2>欢迎使用密码器</h2>
         <p>这是首页内容区域</p>
       </div>
@@ -59,7 +55,7 @@ const switchView = (view: string) => {
       <div v-if="currentView === 'settings'">
         <h2>设置</h2>
         <p>应用程序设置选项</p>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

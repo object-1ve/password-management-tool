@@ -1,7 +1,6 @@
 {
-  "name": "electron-0331",
-  "private": true,
-  "version": "0.0.1",
+  "name": "password-management-tool",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

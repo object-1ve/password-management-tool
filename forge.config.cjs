@@ -23,10 +23,10 @@ module.exports = {
           '!**/node_modules/**/*',
           '!**/.git/**/*'
         ],
-        name: 'electron-0331',
+        name: 'password-management-tool',
         manufacturer: 'yzzob',
         description: 'password management tool',
-        exe: 'electron-0331.exe',
+        exe: 'password-management-tool.exe',
         icon: path.join(__dirname, 'public', 'logo.ico'),
         ui: {
           chooseDirectory: true
