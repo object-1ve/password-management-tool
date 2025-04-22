@@ -1,4 +1,4 @@
-# Electron-y
+# password-management-tool
 
 记录我electron的学习之旅
 
