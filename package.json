@@ -7,8 +7,8 @@
     "preview": "vite preview",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "build": "vite build && electron-rebuild",
-    "make": "electron-forge make"
+    "build": "vite build",
+    "make": "npm run build && electron-forge make"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

@@ -2,11 +2,10 @@ const path = require('path');
 
 module.exports = {
   packagerConfig: {
-    asar: true,  // 如果不想 asar，就设为 false
+    asar: true,  
     extraResource: [
       path.resolve(__dirname, 'dist'),
       path.resolve(__dirname, 'public')
-      // path.resolve(__dirname, 'userData')
     ],
     icon: path.resolve(__dirname, 'public', 'logo.ico')
   },
@@ -43,7 +42,7 @@ module.exports = {
       config: {
         repository: {
           owner: 'yzzob',
-          name: 'electron-y'   /* 仓库名不要带 https:// 前缀 */
+          name: 'electron-y'
         },
         prerelease: false,
         draft: true
