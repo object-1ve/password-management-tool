@@ -1,1 +1,27 @@
-"use strict";const i=require("electron"),o=require("fs/promises");i.contextBridge.exposeInMainWorld("api",{on(...e){const[n,r]=e;return i.ipcRenderer.on(n,(t,...c)=>r(t,...c))},off(...e){const[n,...r]=e;return i.ipcRenderer.off(n,...r)},send(...e){const[n,...r]=e;return i.ipcRenderer.send(n,...r)},invoke(...e){const[n,...r]=e;return i.ipcRenderer.invoke(n,...r)},safeQuery:(e,n=[])=>i.ipcRenderer.invoke("database:query",{sql:e,params:n}),showOpenDialog:e=>i.ipcRenderer.invoke("dialog:openFile",e),readFile:(e,n="utf-8")=>o.readFile(e,n),writeFile:(e,n,r="utf-8")=>o.writeFile(e,n,r),showSaveDialog:e=>i.ipcRenderer.invoke("dialog:saveFile",e),writeToClipboard:e=>i.ipcRenderer.invoke("clipboard:writeText",e)});
+"use strict";
+const electron = require("electron");
+const fs = require("fs/promises");
+electron.contextBridge.exposeInMainWorld("api", {
+  on(...args) {
+    const [channel, listener] = args;
+    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
+  },
+  off(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.off(channel, ...omit);
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  },
+  safeQuery: (sql, params = []) => electron.ipcRenderer.invoke("database:query", { sql, params }),
+  showOpenDialog: (options) => electron.ipcRenderer.invoke("dialog:openFile", options),
+  readFile: (filePath, encoding = "utf-8") => fs.readFile(filePath, encoding),
+  writeFile: (filePath, data, encoding = "utf-8") => fs.writeFile(filePath, data, encoding),
+  showSaveDialog: (options) => electron.ipcRenderer.invoke("dialog:saveFile", options),
+  writeToClipboard: (text) => electron.ipcRenderer.invoke("clipboard:writeText", text)
+});
