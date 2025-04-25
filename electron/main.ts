@@ -36,7 +36,6 @@ function createWindow() {
     
   });
 
-
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString());
   });
@@ -51,6 +50,22 @@ function createWindow() {
     win?.show();
   });
 }
+
+
+function createNewWindow() {
+  const newWin = new BrowserWindow({
+    width: 500,
+    height: 400,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
+  newWin.loadFile(path.join(__dirname, 'newPage.html'))
+}
+
+ipcMain.on('open-new-window', () => {
+  createNewWindow()
+})
 
 function createDatabase(): void {
   try {
@@ -125,9 +140,6 @@ ipcMain.handle('database:query', async (_, { sql, params = [] }: { sql: string; 
     return Promise.reject(error);
   }
 });
-// ipcMain.handle('writeToClipboard', (event, text) => {
-//   clipboard.writeText(text);
-// });
 ipcMain.handle('dialog:openFile', async (_, options) => {
   return await dialog.showOpenDialog(options)
 })

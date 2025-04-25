@@ -3,6 +3,8 @@ import { ref } from 'vue';
 // import ytable from './pages/ytable.vue'
 // import yy from './pages/yy.vue'
 import yMain from './pages/ymain/ymain.vue'
+import ytoDoList from './pages/toDoList/toDoList.vue'
+import pageThree from './pages/pageThree/index.vue'
 const currentView = ref('home');
 const switchView = (view: string) => {
   currentView.value = view;
@@ -19,17 +21,17 @@ const switchView = (view: string) => {
             @click="switchView('home')">
           首页
         </div>
-        <!-- <div class="nav-item" 
+        <div class="nav-item" 
             :class="{ active: currentView === 'passwords' }" 
             @click="switchView('passwords')">
-          密码管理
+            任务清单
         </div>
         <div class="nav-item" 
             :class="{ active: currentView === 'generate' }" 
             @click="switchView('generate')">
           密码生成
         </div>
-        <div class="nav-item" 
+        <!-- <div class="nav-item" 
             :class="{ active: currentView === 'settings' }" 
             @click="switchView('settings')">
           设置
@@ -43,16 +45,15 @@ const switchView = (view: string) => {
           <yMain></yMain>
       </div>
       
-      <!-- <div v-if="currentView === 'passwords'">
-        <h2>欢迎使用密码器</h2>
-        <p>这是首页内容区域</p>
+      <div v-if="currentView === 'passwords'">
+        <ytoDoList></ytoDoList>
       </div>
       
       <div v-if="currentView === 'generate'">
-        <h2>密码生成器</h2>
+        <pageThree></pageThree>
       </div>
       
-      <div v-if="currentView === 'settings'">
+      <!-- <div v-if="currentView === 'settings'">
         <h2>设置</h2>
         <p>应用程序设置选项</p>
       </div> -->

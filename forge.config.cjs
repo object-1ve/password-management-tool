@@ -15,7 +15,7 @@ module.exports = {
       name: '@electron-forge/maker-wix',      // ✅ 正确的 Wix Maker
       platforms: ['win32'],
       config: {
-        appDirectory: path.join(__dirname, 'out', 'electron-0331-win32-x64'),
+        appDirectory: path.join(__dirname, 'out', 'password-management-tool-win32-ia32'),
         outputDirectory: path.join(__dirname, 'out', 'msi'),
         files: [
           '**/*',
@@ -42,7 +42,7 @@ module.exports = {
       config: {
         repository: {
           owner: 'yzzob',
-          name: 'electron-y'
+          name: 'password-management-tool'
         },
         prerelease: false,
         draft: true

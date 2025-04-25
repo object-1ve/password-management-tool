@@ -23,5 +23,6 @@ electron.contextBridge.exposeInMainWorld("api", {
   readFile: (filePath, encoding = "utf-8") => fs.readFile(filePath, encoding),
   writeFile: (filePath, data, encoding = "utf-8") => fs.writeFile(filePath, data, encoding),
   showSaveDialog: (options) => electron.ipcRenderer.invoke("dialog:saveFile", options),
-  writeToClipboard: (text) => electron.ipcRenderer.invoke("clipboard:writeText", text)
+  writeToClipboard: (text) => electron.ipcRenderer.invoke("clipboard:writeText", text),
+  openNewWindow: () => electron.ipcRenderer.send("open-new-window")
 });
