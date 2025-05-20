@@ -5,6 +5,11 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    headers: {
+      "Content-Security-Policy": "default-src 'self' 'unsafe-inline'; script-src 'self'"
+    }
+  },
   build: {
     outDir: 'dist',
   },

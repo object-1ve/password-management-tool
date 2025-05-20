@@ -13,3 +13,7 @@ windows通过release的mis
 ## 0421
 通过修改forge.config.cjs和package.json
 修复了打包错误的问题
+
+## 0520
+添加了鼠标悬浮,提示框显示格子内容
+解决了Content Security Policy (CSP)产生的报错

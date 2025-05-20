@@ -47,7 +47,12 @@ const loadPasswords = async function () {
         originalPasswordList.value = [];
     }
 };
-
+const handleMouseOver = (password: any, field: string) => {
+    promptMessage.value = `${field}: ${password[field] || '无内容'}`
+}
+const handleMouseOut = () => {
+    promptMessage.value = ''
+}
 const handlePasswordRightClick = (event: MouseEvent) => {
     event.preventDefault()
     passwordMenuPosition.value = {
@@ -378,35 +383,53 @@ onUnmounted(() => {
                 </thead>
                 <tbody>
                     <tr v-for="(item, index) in passwordList" :key="index">
-                        <td :data-matched="item?._matches?.username" data-field="username"
+                        <td 
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut"
+                            :data-matched="item?._matches?.username" data-field="username"
                             @contextmenu="handleRightClick($event, item, 'username')"
                             @dblclick="copyByDoubleClick(item, 'username')">
                             {{ item?.username }}
                         </td>
-                        <td :data-matched="item?._matches?.password" data-field="password"
+                        <td 
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut"
+                            :data-matched="item?._matches?.password" data-field="password"
                             @contextmenu="handleRightClick($event, item, 'password')"
                             @dblclick="copyByDoubleClick(item, 'password')">
                             {{ item?.password }}
                         </td>
                         <td :data-matched="item?._matches?.url" data-field="url"
                             @contextmenu="handleRightClick($event, item, 'url')"
-                            @dblclick="copyByDoubleClick(item, 'url')">
+                            @dblclick="copyByDoubleClick(item, 'url')"
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut">
                             {{ item?.url }}
                         </td>
                         <td :data-matched="item?._matches?.remark" data-field="remark"
                             @contextmenu="handleRightClick($event, item, 'remark')"
-                            @dblclick="copyByDoubleClick(item, 'remark')">
+                            @dblclick="copyByDoubleClick(item, 'remark')"
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut">
                             {{ item?.remark }}
+
                         </td>
                         <td :data-matched="item?._matches?.updateTime" data-field="updateTime"
                             @contextmenu="handleRightClick($event, item, 'updateTime')"
-                            @dblclick="copyByDoubleClick(item, 'updateTime')">
+                            @dblclick="copyByDoubleClick(item, 'updateTime')"
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut">
+                            
                             {{ item?.updateTime }}
+
                         </td>
                         <td :data-matched="item?._matches?.createTime" data-field="createTime"
                             @contextmenu="handleRightClick($event, item, 'createTime')"
-                            @dblclick="copyByDoubleClick(item, 'createTime')">
+                            @dblclick="copyByDoubleClick(item, 'createTime')"
+                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseout="handleMouseOut">
                             {{ item?.createTime }}
+                            
                         </td>
                     </tr>
                 </tbody>
