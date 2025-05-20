@@ -48,7 +48,7 @@ const loadPasswords = async function () {
     }
 };
 const handleMouseOver = (password: any, field: string) => {
-    promptMessage.value = `${field}: ${password[field] || '无内容'}`
+    promptMessage.value = `${password[field] || '无内容'}`
 }
 const handleMouseOut = () => {
     promptMessage.value = ''
@@ -392,7 +392,7 @@ onUnmounted(() => {
                             {{ item?.username }}
                         </td>
                         <td 
-                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseover="handleMouseOver(item, 'password')"
                             @mouseout="handleMouseOut"
                             :data-matched="item?._matches?.password" data-field="password"
                             @contextmenu="handleRightClick($event, item, 'password')"
@@ -402,14 +402,14 @@ onUnmounted(() => {
                         <td :data-matched="item?._matches?.url" data-field="url"
                             @contextmenu="handleRightClick($event, item, 'url')"
                             @dblclick="copyByDoubleClick(item, 'url')"
-                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseover="handleMouseOver(item, 'url')"
                             @mouseout="handleMouseOut">
                             {{ item?.url }}
                         </td>
                         <td :data-matched="item?._matches?.remark" data-field="remark"
                             @contextmenu="handleRightClick($event, item, 'remark')"
                             @dblclick="copyByDoubleClick(item, 'remark')"
-                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseover="handleMouseOver(item, 'remark')"
                             @mouseout="handleMouseOut">
                             {{ item?.remark }}
 
@@ -417,7 +417,7 @@ onUnmounted(() => {
                         <td :data-matched="item?._matches?.updateTime" data-field="updateTime"
                             @contextmenu="handleRightClick($event, item, 'updateTime')"
                             @dblclick="copyByDoubleClick(item, 'updateTime')"
-                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseover="handleMouseOver(item, 'updateTime')"
                             @mouseout="handleMouseOut">
                             
                             {{ item?.updateTime }}
@@ -426,7 +426,7 @@ onUnmounted(() => {
                         <td :data-matched="item?._matches?.createTime" data-field="createTime"
                             @contextmenu="handleRightClick($event, item, 'createTime')"
                             @dblclick="copyByDoubleClick(item, 'createTime')"
-                            @mouseover="handleMouseOver(item, 'username')"
+                            @mouseover="handleMouseOver(item, 'createTime')"
                             @mouseout="handleMouseOut">
                             {{ item?.createTime }}
                             
