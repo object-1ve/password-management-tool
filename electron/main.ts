@@ -149,3 +149,6 @@ ipcMain.handle('dialog:saveFile', async(_, options) => {
 ipcMain.handle('clipboard:writeText', async(_, text) => {
   return clipboard.writeText(text)
 })
+ipcMain.handle('clipboard:readText', async(_, text) => {
+  return clipboard.readText(text)
+})

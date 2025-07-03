@@ -160,6 +160,11 @@ export async function writeToClipboardApi(content: string) {
         throw error;
     }
 }
+
+export async function pasteApi (){
+    const content = await (window as any).api.readFromClipboard();
+    return content;
+}
 // export async function writeToClipboard(text: string) {
 //     try {
 //         await (window as any).api.writeToClipboard(text);

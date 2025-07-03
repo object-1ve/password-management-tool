@@ -54,23 +54,9 @@
 <template>
     <div class="todo-container">
         <h1>待办事项</h1>
-        <div class="input-section">
-            <input v-model="newTodo" placeholder="添加新任务" @keyup.enter="addTodo" />
-            <button @click="addTodo">添加</button>
-        </div>
-        <div>
-            <button @click="newForm">新窗口</button>
-        </div>
-        <ul class="todo-list">
-            <li v-for="todo in todos" :key="todo.id" :class="{ completed: todo.completed }">
-                <input type="checkbox" :checked="todo.completed" @change="toggleTodo(todo.id)" />
-                <span>{{ todo.text }}</span>
-                <button @click="deleteTodo(todo.id)">删除</button>
-            </li>
-        </ul>
     </div>
 </template>
     
-<style scoped src="./toDoList.css"></style>
+<style scoped src="./shortcuts.css"></style>
 
 

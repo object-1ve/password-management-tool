@@ -30,5 +30,6 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('dialog:saveFile', options),
   writeToClipboard: (text: string) =>
     ipcRenderer.invoke('clipboard:writeText', text),
-  openNewWindow: () => ipcRenderer.send('open-new-window')
+  openNewWindow: () => ipcRenderer.send('open-new-window'),
+  readFromClipboard: () => ipcRenderer.invoke('clipboard:readText'),
 })
