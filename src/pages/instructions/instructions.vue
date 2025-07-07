@@ -13,8 +13,6 @@
             v-for="(tag, index) in (scope.row.remarks ?? '').split(',').map(s => s.trim()).filter(Boolean)"
             :key="index"
             style="margin-right: 6px;"
-            closable
-            @close="handleTagClose(scope.row.id, tag)"
           >
             {{ tag }}
           </el-tag>

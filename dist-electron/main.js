@@ -1,53 +1,73 @@
-import { app as i, ipcMain as c, BrowserWindow as p, dialog as m, clipboard as u } from "electron";
-import { fileURLToPath as P } from "node:url";
-import e from "node:path";
-import w from "better-sqlite3";
-import * as T from "fs";
-const l = e.dirname(P(import.meta.url));
-process.env.APP_ROOT = e.join(l, "..");
-const d = process.env.VITE_DEV_SERVER_URL, f = e.join(process.env.APP_ROOT, "dist-electron"), E = e.join(process.env.APP_ROOT, "dist"), _ = d ? e.join(process.env.APP_ROOT, "userData", "mydb.db") : e.join(i.getPath("userData"), "mydb.db");
-process.env.VITE_PUBLIC = d ? e.join(process.env.APP_ROOT, "public") : E;
-let n;
-function R() {
-  console.log("RENDERER_DIST: ", E), console.log("VITE_PUBLIC: ", process.env.VITE_PUBLIC), n = new p({
+import { app, ipcMain, BrowserWindow, dialog, clipboard } from "electron";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import Database from "better-sqlite3";
+import * as fs from "fs";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path.join(__dirname, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
+const dbPath = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "userData", "mydb.db") : path.join(app.getPath("userData"), "mydb.db");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  console.log("RENDERER_DIST: ", RENDERER_DIST);
+  console.log("VITE_PUBLIC: ", process.env.VITE_PUBLIC);
+  win = new BrowserWindow({
     width: 1200,
     // 设置窗口的宽度为 1200 像素。
     height: 800,
     // 设置窗口的高度为 800 像素。
-    show: !1,
+    show: false,
     // 初始时不显示窗口。
     title: "yzzob",
-    icon: e.join(process.env.VITE_PUBLIC, "logo.ico"),
-    autoHideMenuBar: !0,
+    icon: path.join(process.env.VITE_PUBLIC, "logo.ico"),
+    autoHideMenuBar: true,
     webPreferences: {
-      preload: e.join(l, "preload.mjs"),
-      nodeIntegration: !0,
-      contextIsolation: !0
+      preload: path.join(__dirname, "preload.mjs"),
+      nodeIntegration: true,
+      contextIsolation: true
     }
-  }), n.webContents.on("did-finish-load", () => {
-    n == null || n.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), d ? n.loadURL(d) : n.loadFile(e.join(E, "index.html")), n.on("ready-to-show", () => {
-    n == null || n.show();
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+  }
+  win.on("ready-to-show", () => {
+    win == null ? void 0 : win.show();
   });
 }
-function I() {
-  new p({
+function createNewWindow() {
+  const newWin = new BrowserWindow({
     width: 500,
     height: 400,
     webPreferences: {
-      preload: e.join(l, "preload.js")
+      preload: path.join(__dirname, "preload.js")
     }
-  }).loadFile(e.join(l, "newPage.html"));
+  });
+  newWin.loadFile(path.join(__dirname, "newPage.html"));
 }
-c.on("open-new-window", () => {
-  I();
+ipcMain.on("open-new-window", () => {
+  createNewWindow();
 });
-function h() {
+function createDatabase() {
   try {
-    const r = "mydb.db", o = !!d, s = o ? e.join(process.env.APP_ROOT, "userData", r) : e.join(i.getPath("userData"), r), t = o ? e.join(process.env.APP_ROOT, "resources", "template.db") : e.join(process.resourcesPath, "template.db");
-    T.existsSync(s) || (T.mkdirSync(e.dirname(s), { recursive: !0 }), T.copyFileSync(t, s), console.log("Copied template DB to:", s));
-    const a = new w(s);
-    a.exec(`
+    const dbName = "mydb.db";
+    const isDev = !!VITE_DEV_SERVER_URL;
+    const targetPath = isDev ? path.join(process.env.APP_ROOT, "userData", dbName) : path.join(app.getPath("userData"), dbName);
+    const sourcePath = isDev ? path.join(process.env.APP_ROOT, "resources", "template.db") : path.join(process.resourcesPath, "template.db");
+    if (!fs.existsSync(targetPath)) {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.copyFileSync(sourcePath, targetPath);
+      console.log("Copied template DB to:", targetPath);
+    }
+    const db = new Database(targetPath);
+    db.exec(`
       CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
@@ -64,40 +84,59 @@ function h() {
         last_used_time INTEGER,
         remarks TEXT
       );
-    `), a.close();
-  } catch (r) {
-    console.error("DB Error:", r.message);
+    `);
+    db.close();
+  } catch (err) {
+    console.error("DB Error:", err.message);
   }
 }
-i.on("window-all-closed", () => {
-  process.platform !== "darwin" && (i.quit(), n = null);
-});
-i.on("activate", () => {
-  p.getAllWindows().length === 0 && (R(), h());
-});
-i.whenReady().then(() => {
-  R(), h();
-});
-c.handle("database:query", async (r, { sql: o, params: s = [] }) => {
-  try {
-    const t = new w(_);
-    if (o.trim().toLowerCase().startsWith("select")) {
-      const a = t.prepare(o).all(s);
-      return t.close(), a;
-    } else {
-      const a = t.prepare(o).run(s);
-      return t.close(), { affectedRows: a.changes };
-    }
-  } catch (t) {
-    return console.error("Database query error:", t.message), Promise.reject(t);
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
   }
 });
-c.handle("dialog:openFile", async (r, o) => await m.showOpenDialog(o));
-c.handle("dialog:saveFile", async (r, o) => m.showSaveDialog(o));
-c.handle("clipboard:writeText", async (r, o) => u.writeText(o));
-c.handle("clipboard:readText", async (r, o) => u.readText(o));
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+    createDatabase();
+  }
+});
+app.whenReady().then(() => {
+  createWindow();
+  createDatabase();
+});
+ipcMain.handle("database:query", async (_, { sql, params = [] }) => {
+  try {
+    const db = new Database(dbPath);
+    if (sql.trim().toLowerCase().startsWith("select")) {
+      const rows = db.prepare(sql).all(params);
+      db.close();
+      return rows;
+    } else {
+      const statement = db.prepare(sql).run(params);
+      db.close();
+      return { affectedRows: statement.changes };
+    }
+  } catch (error) {
+    console.error("Database query error:", error.message);
+    return Promise.reject(error);
+  }
+});
+ipcMain.handle("dialog:openFile", async (_, options) => {
+  return await dialog.showOpenDialog(options);
+});
+ipcMain.handle("dialog:saveFile", async (_, options) => {
+  return dialog.showSaveDialog(options);
+});
+ipcMain.handle("clipboard:writeText", async (_, text) => {
+  return clipboard.writeText(text);
+});
+ipcMain.handle("clipboard:readText", async (_, text) => {
+  return clipboard.readText(text);
+});
 export {
-  f as MAIN_DIST,
-  E as RENDERER_DIST,
-  d as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };
