@@ -2,10 +2,8 @@
 import { ref } from "vue";
 // import ytable from './pages/ytable.vue'
 // import yy from './pages/yy.vue'
-import yMain from "./pages/passwordManager/passwordManager.vue";
-import ytoDoList from "./pages/toDoList/toDoList.vue";
-import pageThree from "./pages/pageThree/index.vue";
-import shortcuts from "./pages/instructions/instructions.vue";
+import passwordManager from "./pages/passwordManager/passwordManager.vue";
+import instructions from "./pages/instructions/instructions.vue";
 const currentView = ref("home");
 const switchView = (view: string) => {
   currentView.value = view;
@@ -22,14 +20,14 @@ const switchView = (view: string) => {
           :class="{ active: currentView === 'home' }"
           @click="switchView('home')"
         >
-          首页
+          密码管理
         </div>
         <div
           class="nav-item"
           :class="{ active: currentView === 'shortcuts' }"
           @click="switchView('shortcuts')"
         >
-          快捷键
+          指令集
         </div>
       </nav>
     </div>
@@ -37,10 +35,10 @@ const switchView = (view: string) => {
     <!-- 右侧内容区 -->
     <div class="content">
       <div v-if="currentView === 'home'">
-        <yMain></yMain>
+        <passwordManager></passwordManager>
       </div>
       <div v-if="currentView === 'shortcuts'">
-        <shortcuts></shortcuts>
+        <instructions></instructions>
       </div>
     </div>
   </div>
@@ -63,7 +61,7 @@ const switchView = (view: string) => {
 }
 
 .sidebar {
-  width: 150px;
+  width: 100px;
   background-color: #ffffff;
   color: rgb(0, 0, 0);
   display: flex;

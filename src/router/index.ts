@@ -14,8 +14,8 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../pages/passwordManager/passwordManager.vue"),
     },
     {
-        name: "shortCuts",
-        path: "/shortCuts",
+        name: "instructions",
+        path: "/instructions",
     component: () => import("../pages/instructions/instructions.vue"),
     }
 ];

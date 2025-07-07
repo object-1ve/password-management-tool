@@ -53,7 +53,7 @@ const switchView = (view: string) => {
           :class="{ active: current[0] === '/shortcuts' }"
           @click="doMenuClick('/shortcuts')"
         >
-          快捷键
+          指令集
         </div>
       </nav>
     </div>

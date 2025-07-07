@@ -44,7 +44,7 @@ export async function insertPassword(passwordData: {
                 passwordData.remark || null,
                 timestamp,  // updateTime
                 timestamp,  // createTime
-                passwordData.numberOfUses ?? 0  // 新增字段
+                passwordData.numberOfUses ?? '0'  // 新增字段
             ]
         );
 
@@ -78,7 +78,7 @@ export async function updatePassword(id: string, passwordData: {
     url?: string,
     remark?: string,
     updateTime?: string,
-    numberOfUses?: number
+    numberOfUses?: string
 }) {
     try {
         const timestamp = getLocalTimestamp();  // 统一时间格式
@@ -98,7 +98,7 @@ export async function updatePassword(id: string, passwordData: {
                 passwordData.url || null,
                 passwordData.remark || null,
                 timestamp,
-                passwordData.numberOfUses ?? 0,
+                passwordData.numberOfUses ?? '0',
                 id
             ]
         );

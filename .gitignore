@@ -29,3 +29,6 @@ dist-electron/
 # project\electron-0331\mydb.db
 out/
 
+dist-electron/main.js
+dist-electron/preload.mjs
+vite.config.ts.timestamp-1751877797802-1b88bf6ff92c8.mjs

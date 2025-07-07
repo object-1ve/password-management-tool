@@ -18,7 +18,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="最后使用时间">
+      <el-table-column label="最后更新时间">
         <template #default="scope">
           {{ formatTimestamp(scope.row.last_used_time) }}
         </template>
@@ -85,7 +85,7 @@ import {
   updateInstruction,
   deleteInstruction,
 } from './index'; // 你的 API 文件路径
-import { ElMessage } from 'element-plus';
+import { ElMessage,ElMessageBox } from 'element-plus';
 
 interface Instruction {
   id?: number;
@@ -127,9 +127,27 @@ const loadData = async () => {
 
 const handleDelete = async (id?: number) => {
   if (!id) return;
-  await deleteInstruction(id);
-  await loadData();
+
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这条数据吗？',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    );
+
+    await deleteInstruction(id);
+    await loadData();
+  } catch (error) {
+    // 用户取消了删除
+    console.log('删除取消', error);
+  }
 };
+
+
 
 const handleTagClose = async (id: number | undefined, tag: string) => {
   if (!id) return;

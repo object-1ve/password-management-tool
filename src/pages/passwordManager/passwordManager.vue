@@ -232,6 +232,7 @@ const addPassword = async () => {
                     // 第二个参数：passwordData
                     ...newPassword.value,
                     updateTime: undefined, // 让后端生成更新时间
+                    numberOfUses: '0',
                 }
             );
             promptMessage.value = "密码更新成功";
@@ -468,8 +469,6 @@ const exportPassword = async () => {
     }
 };
 
-
-
 const handleClickOutside = () => {
     contextMenuVisible.value = false;
 };
@@ -516,10 +515,5 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener("click", handleClickOutside);
 });
-
-
 </script>
-
-
-
 <style scoped src="./ymain.css"></style>
