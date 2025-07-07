@@ -2,10 +2,10 @@
 import { ref } from "vue";
 // import ytable from './pages/ytable.vue'
 // import yy from './pages/yy.vue'
-import yMain from "./pages/ymain/ymain.vue";
+import yMain from "./pages/passwordManager/passwordManager.vue";
 import ytoDoList from "./pages/toDoList/toDoList.vue";
 import pageThree from "./pages/pageThree/index.vue";
-import shortcuts from "./pages/shortcuts/shortcuts.vue";
+import shortcuts from "./pages/instructions/instructions.vue";
 const currentView = ref("home");
 const switchView = (view: string) => {
   currentView.value = view;

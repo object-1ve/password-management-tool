@@ -96,7 +96,14 @@ function createDatabase(): void {
         remark TEXT,
         updateTime TEXT NOT NULL,
         createTime TEXT NOT NULL
-      )
+      );
+      CREATE TABLE IF NOT EXISTS instructions (
+        id INTEGER NOT NULL DEFAULT NULL COLLATE RTRIM PRIMARY KEY AUTOINCREMENT,
+        keys TEXT,
+        functions TEXT,
+        last_used_time INTEGER,
+        remarks TEXT
+      );
     `);
     db.close();
   } catch (err: any) {

@@ -1,15 +1,15 @@
-import { app as i, ipcMain as c, BrowserWindow as m, dialog as w, clipboard as h } from "electron";
-import { fileURLToPath as R } from "node:url";
+import { app as i, ipcMain as c, BrowserWindow as p, dialog as m, clipboard as u } from "electron";
+import { fileURLToPath as P } from "node:url";
 import e from "node:path";
-import u from "better-sqlite3";
-import * as p from "fs";
-const d = e.dirname(R(import.meta.url));
-process.env.APP_ROOT = e.join(d, "..");
-const l = process.env.VITE_DEV_SERVER_URL, D = e.join(process.env.APP_ROOT, "dist-electron"), T = e.join(process.env.APP_ROOT, "dist"), _ = l ? e.join(process.env.APP_ROOT, "userData", "mydb.db") : e.join(i.getPath("userData"), "mydb.db");
-process.env.VITE_PUBLIC = l ? e.join(process.env.APP_ROOT, "public") : T;
-let r;
-function E() {
-  console.log("RENDERER_DIST: ", T), console.log("VITE_PUBLIC: ", process.env.VITE_PUBLIC), r = new m({
+import w from "better-sqlite3";
+import * as T from "fs";
+const l = e.dirname(P(import.meta.url));
+process.env.APP_ROOT = e.join(l, "..");
+const d = process.env.VITE_DEV_SERVER_URL, f = e.join(process.env.APP_ROOT, "dist-electron"), E = e.join(process.env.APP_ROOT, "dist"), _ = d ? e.join(process.env.APP_ROOT, "userData", "mydb.db") : e.join(i.getPath("userData"), "mydb.db");
+process.env.VITE_PUBLIC = d ? e.join(process.env.APP_ROOT, "public") : E;
+let n;
+function R() {
+  console.log("RENDERER_DIST: ", E), console.log("VITE_PUBLIC: ", process.env.VITE_PUBLIC), n = new p({
     width: 1200,
     // 设置窗口的宽度为 1200 像素。
     height: 800,
@@ -20,33 +20,33 @@ function E() {
     icon: e.join(process.env.VITE_PUBLIC, "logo.ico"),
     autoHideMenuBar: !0,
     webPreferences: {
-      preload: e.join(d, "preload.mjs"),
+      preload: e.join(l, "preload.mjs"),
       nodeIntegration: !0,
       contextIsolation: !0
     }
-  }), r.webContents.on("did-finish-load", () => {
-    r == null || r.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), l ? r.loadURL(l) : r.loadFile(e.join(T, "index.html")), r.on("ready-to-show", () => {
-    r == null || r.show();
+  }), n.webContents.on("did-finish-load", () => {
+    n == null || n.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  }), d ? n.loadURL(d) : n.loadFile(e.join(E, "index.html")), n.on("ready-to-show", () => {
+    n == null || n.show();
   });
 }
-function b() {
-  new m({
+function I() {
+  new p({
     width: 500,
     height: 400,
     webPreferences: {
-      preload: e.join(d, "preload.js")
+      preload: e.join(l, "preload.js")
     }
-  }).loadFile(e.join(d, "newPage.html"));
+  }).loadFile(e.join(l, "newPage.html"));
 }
 c.on("open-new-window", () => {
-  b();
+  I();
 });
-function P() {
+function h() {
   try {
-    const n = "mydb.db", o = !!l, s = o ? e.join(process.env.APP_ROOT, "userData", n) : e.join(i.getPath("userData"), n), t = o ? e.join(process.env.APP_ROOT, "resources", "template.db") : e.join(process.resourcesPath, "template.db");
-    p.existsSync(s) || (p.mkdirSync(e.dirname(s), { recursive: !0 }), p.copyFileSync(t, s), console.log("Copied template DB to:", s));
-    const a = new u(s);
+    const r = "mydb.db", o = !!d, s = o ? e.join(process.env.APP_ROOT, "userData", r) : e.join(i.getPath("userData"), r), t = o ? e.join(process.env.APP_ROOT, "resources", "template.db") : e.join(process.resourcesPath, "template.db");
+    T.existsSync(s) || (T.mkdirSync(e.dirname(s), { recursive: !0 }), T.copyFileSync(t, s), console.log("Copied template DB to:", s));
+    const a = new w(s);
     a.exec(`
       CREATE TABLE IF NOT EXISTS passwords (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,24 +56,31 @@ function P() {
         remark TEXT,
         updateTime TEXT NOT NULL,
         createTime TEXT NOT NULL
-      )
+      );
+      CREATE TABLE IF NOT EXISTS instructions (
+        id INTEGER NOT NULL DEFAULT NULL COLLATE RTRIM PRIMARY KEY AUTOINCREMENT,
+        keys TEXT,
+        functions TEXT,
+        last_used_time INTEGER,
+        remarks TEXT
+      );
     `), a.close();
-  } catch (n) {
-    console.error("DB Error:", n.message);
+  } catch (r) {
+    console.error("DB Error:", r.message);
   }
 }
 i.on("window-all-closed", () => {
-  process.platform !== "darwin" && (i.quit(), r = null);
+  process.platform !== "darwin" && (i.quit(), n = null);
 });
 i.on("activate", () => {
-  m.getAllWindows().length === 0 && (E(), P());
+  p.getAllWindows().length === 0 && (R(), h());
 });
 i.whenReady().then(() => {
-  E(), P();
+  R(), h();
 });
-c.handle("database:query", async (n, { sql: o, params: s = [] }) => {
+c.handle("database:query", async (r, { sql: o, params: s = [] }) => {
   try {
-    const t = new u(_);
+    const t = new w(_);
     if (o.trim().toLowerCase().startsWith("select")) {
       const a = t.prepare(o).all(s);
       return t.close(), a;
@@ -85,12 +92,12 @@ c.handle("database:query", async (n, { sql: o, params: s = [] }) => {
     return console.error("Database query error:", t.message), Promise.reject(t);
   }
 });
-c.handle("dialog:openFile", async (n, o) => await w.showOpenDialog(o));
-c.handle("dialog:saveFile", async (n, o) => w.showSaveDialog(o));
-c.handle("clipboard:writeText", async (n, o) => h.writeText(o));
-c.handle("clipboard:readText", async (n, o) => h.readText(o));
+c.handle("dialog:openFile", async (r, o) => await m.showOpenDialog(o));
+c.handle("dialog:saveFile", async (r, o) => m.showSaveDialog(o));
+c.handle("clipboard:writeText", async (r, o) => u.writeText(o));
+c.handle("clipboard:readText", async (r, o) => u.readText(o));
 export {
-  D as MAIN_DIST,
-  T as RENDERER_DIST,
-  l as VITE_DEV_SERVER_URL
+  f as MAIN_DIST,
+  E as RENDERER_DIST,
+  d as VITE_DEV_SERVER_URL
 };

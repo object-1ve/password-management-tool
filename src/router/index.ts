@@ -11,12 +11,12 @@ const routes: Array<RouteRecordRaw> = [
     {
         name: "passwordManager",
         path: "/passwordManager",
-    component: () => import("../pages/ymain/ymain.vue"),
+    component: () => import("../pages/passwordManager/passwordManager.vue"),
     },
     {
         name: "shortCuts",
         path: "/shortCuts",
-    component: () => import("../pages/shortcuts/shortcuts.vue"),
+    component: () => import("../pages/instructions/instructions.vue"),
     }
 ];
 
