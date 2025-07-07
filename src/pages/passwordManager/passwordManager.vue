@@ -10,6 +10,7 @@ import {
     exportToTxtFile,
     writeToClipboardApi,
     pasteApi,
+    incrementUsageCountApi
     // writeToClipboard
 } from "./index";
 
@@ -37,13 +38,24 @@ const openAddPasswordWindow = () => {
 const loadPasswords = async function () {
     try {
         const passwords = await getPasswords();
-        // 按照updateTime降序排列
+        // 先按 numberOfUses 降序，再按 updateTime 降序
         passwordList.value = (passwords || []).sort(function (
-            a: { updateTime: string },
-            b: { updateTime: string }
+            a: { numberOfUses: number; updateTime: string },
+            b: { numberOfUses: number; updateTime: string }
         ) {
-            return new Date(b.updateTime).getTime() - new Date(a.updateTime).getTime();
+            const usesA = a.numberOfUses ?? 0;
+            const usesB = b.numberOfUses ?? 0;
+
+            if (usesB !== usesA) {
+                return usesB - usesA; // 按使用次数降序
+            }
+
+            // 如果使用次数相等，则按更新时间降序
+            const timeA = new Date(a.updateTime).getTime();
+            const timeB = new Date(b.updateTime).getTime();
+            return timeB - timeA;
         });
+
         originalPasswordList.value = [...passwordList.value];
         searchKeyword.value = "";
     } catch (error) {
@@ -52,6 +64,7 @@ const loadPasswords = async function () {
         originalPasswordList.value = [];
     }
 };
+
 const handleMouseOver = (password: any, field: string) => {
     promptMessage.value = `${password[field] || "无内容"}`;
 };
@@ -218,16 +231,20 @@ const copyContent = async () => {
         await writeToClipboardApi(fieldValue);
         contextMenuVisible.value = false;
         promptMessage.value = `${fieldValue} 已复制到剪贴板`;
+
     } catch (error) {
         console.error("复制失败:", error);
         alert("复制失败");
     }
 };
-const copyByClick = async (password: any, field: string) => {
+const copyByClick = async (password: any, field: string , id:number) => {
     try {
-        const value = password[field];
+        const value = String(password[field]);
         await writeToClipboardApi(value);
         promptMessage.value = `${value} 已复制到剪贴板`;
+        console.log(id);
+        await incrementUsageCountApi(id)
+        await loadPasswords();
     } catch (error) {
         console.error("复制失败:", error);
         alert("复制失败");
@@ -251,6 +268,7 @@ const exportPassword = async () => {
                     password.password,
                     password.url,
                     password.remark,
+                    password.numberOfUses,
                     password.updateTime,
                     password.createTime,
                 ].join("\t") + "\n";
@@ -340,6 +358,7 @@ const search = () => {
                 password: item.password?.toLowerCase().includes(keyword),
                 url: item.url?.toLowerCase().includes(keyword),
                 remark: item.remark?.toLowerCase().includes(keyword),
+                numberOfUses: item.numberOfUses?.toLowerCase().includes(keyword),
                 updateTime: item.updateTime?.toLowerCase().includes(keyword),
                 createTime: item.createTime?.toLowerCase().includes(keyword),
             };
@@ -417,6 +436,7 @@ onUnmounted(() => {
                         <th>密码</th>
                         <th>网址</th>
                         <th>备注</th>
+                        <th>使用次数</th>
                         <th>更新时间</th>
                         <th>创建时间</th>
                     </tr>
@@ -426,36 +446,46 @@ onUnmounted(() => {
                         <td @mouseover="handleMouseOver(item, 'username')" @mouseout="handleMouseOut"
                             :data-matched="item?._matches?.username" data-field="username"
                             @contextmenu="handleRightClick($event, item, 'username')"
-                            @click="copyByClick(item, 'username')">
+                            @click="copyByClick(item, 'username',item.id)">
                             {{ item?.username }}
                         </td>
                         <td @mouseover="handleMouseOver(item, 'password')" @mouseout="handleMouseOut"
                             :data-matched="item?._matches?.password" data-field="password"
                             @contextmenu="handleRightClick($event, item, 'password')"
-                            @click="copyByClick(item, 'password')">
+                            @click="copyByClick(item, 'password',item.id)">
                             {{ item?.password }}
                         </td>
                         <td :data-matched="item?._matches?.url" data-field="url"
                             @contextmenu="handleRightClick($event, item, 'url')"
-                            @click="copyByClick(item, 'url')" @mouseover="handleMouseOver(item, 'url')"
+                            @click="copyByClick(item, 'url',item.id)" 
+                            @mouseover="handleMouseOver(item, 'url')"
                             @mouseout="handleMouseOut">
                             {{ item?.url }}
                         </td>
                         <td :data-matched="item?._matches?.remark" data-field="remark"
                             @contextmenu="handleRightClick($event, item, 'remark')"
-                            @click="copyByClick(item, 'remark')" @mouseover="handleMouseOver(item, 'remark')"
+                            @click="copyByClick(item, 'remark',item.id)" 
+                            @mouseover="handleMouseOver(item, 'remark')"
                             @mouseout="handleMouseOut">
                             {{ item?.remark }}
                         </td>
+                        <td :data-matched="item?._matches?.numberOfUses" data-field="numberOfUses"
+                            @contextmenu="handleRightClick($event, item, 'numberOfUses')"
+                            @click="copyByClick(item, 'numberOfUses',item.id)" 
+                            @mouseover="handleMouseOver(item, 'numberOfUses')"
+                            @mouseout="handleMouseOut">
+                            {{ item?.numberOfUses }}
+                        </td>
                         <td :data-matched="item?._matches?.updateTime" data-field="updateTime"
                             @contextmenu="handleRightClick($event, item, 'updateTime')"
-                            @click="copyByClick(item, 'updateTime')"
-                            @mouseover="handleMouseOver(item, 'updateTime')" @mouseout="handleMouseOut">
+                            @click="copyByClick(item, 'updateTime',item.id)"
+                            @mouseover="handleMouseOver(item, 'updateTime')"
+                            @mouseout="handleMouseOut">
                             {{ item?.updateTime }}
                         </td>
                         <td :data-matched="item?._matches?.createTime" data-field="createTime"
                             @contextmenu="handleRightClick($event, item, 'createTime')"
-                            @click="copyByClick(item, 'createTime')"
+                            @click="copyByClick(item, 'createTime',item.id)"
                             @mouseover="handleMouseOver(item, 'createTime')" @mouseout="handleMouseOut">
                             {{ item?.createTime }}
                         </td>

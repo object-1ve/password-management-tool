@@ -104,7 +104,18 @@ function createDatabase(): void {
         last_used_time INTEGER,
         remarks TEXT
       );
+      
     `);
+    try {
+      db.exec(`
+        ALTER TABLE passwords ADD COLUMN numberOfUses TEXT DEFAULT '0';
+      `);
+    } catch (alterErr: any) {
+      // SQLite 会在字段已存在时报错，这里忽略即可
+      if (!alterErr.message.includes("duplicate column name")) {
+        console.error("添加 numberOfUses 字段失败:", alterErr.message);
+      }
+    }
     db.close();
   } catch (err: any) {
     console.error('DB Error:', err.message);
