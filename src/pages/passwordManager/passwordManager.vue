@@ -1,3 +1,139 @@
+<template>
+    <div class="password-manager">
+        <div class="button-section">
+            <div class="buttons-left">
+                <button class="button0" @click="loadPasswords">刷新</button>
+                <template v-if="!showAddPasswordWindow">
+                    <button class="button0" @click="openAddPasswordWindow">添加</button>
+                </template>
+                <template v-else>
+                    <button @click="handleCancel" class="button2">取消</button>
+                    <button @click="addPassword" class="button2">
+                        {{ isEditing ? "更新" : "添加" }}
+                    </button>
+                </template>
+                <button class="button0" @click="importFromTxt">txt导入</button>
+                <button class="button0" @click="exportPassword">导出txt</button>
+            </div>
+            <div class="search-input-wrapper">
+                <input type="text" v-model="searchKeyword" placeholder="输入关键词搜索" @input="search"
+                    @contextmenu.prevent="handleSearchRightClick" @click=handleClick() />
+            </div>
+        </div>
+        <div class="add-password-window" v-if="showAddPasswordWindow">
+            <div class="window-content">
+                <h3>{{ isEditing ? "编辑密码" : "添加新密码" }}</h3>
+                <div class="input-group">
+                    <label for="username">用户名</label>
+                    <input id="username" type="text" v-model="newPassword.username" placeholder="请输入用户名" />
+                </div>
+                <div class="input-group">
+                    <label for="password">密码</label>
+                    <input id="password" type="text" v-model="newPassword.password" placeholder="请输入密码"
+                        @contextmenu.prevent="handlePasswordRightClick" />
+                </div>
+                <div class="input-group">
+                    <label for="url">网址</label>
+                    <input id="url" type="url" v-model="newPassword.url" placeholder="请输入网址 (可选)" />
+                </div>
+                <div class="input-group">
+                    <label for="remark">备注</label>
+                    <input id="remark" type="text" v-model="newPassword.remark" placeholder="请输入备注 (可选)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="password-table" v-if="passwordList.length > 0">
+            <table>
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>密码</th>
+                        <th>网址</th>
+                        <th>备注</th>
+                        <th>使用次数</th>
+                        <!-- <th>更新时间</th>
+                        <th>创建时间</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in passwordList" :key="index">
+                        <td @mouseover="handleMouseOver(item, 'username')" @mouseout="handleMouseOut"
+                            :data-matched="item?._matches?.username" data-field="username"
+                            @contextmenu="handleRightClick($event, item, 'username')"
+                            @click="copyByClick(item, 'username',item.id)">
+                            {{ item?.username }}
+                        </td>
+                        <td @mouseover="handleMouseOver(item, 'password')" @mouseout="handleMouseOut"
+                            :data-matched="item?._matches?.password" data-field="password"
+                            @contextmenu="handleRightClick($event, item, 'password')"
+                            @click="copyByClick(item, 'password',item.id)">
+                            {{ item?.password }}
+                        </td>
+                        <td :data-matched="item?._matches?.url" data-field="url"
+                            @contextmenu="handleRightClick($event, item, 'url')"
+                            @click="copyByClick(item, 'url',item.id)" 
+                            @mouseover="handleMouseOver(item, 'url')"
+                            @mouseout="handleMouseOut">
+                            {{ item?.url }}
+                        </td>
+                        <td :data-matched="item?._matches?.remark" data-field="remark"
+                            @contextmenu="handleRightClick($event, item, 'remark')"
+                            @click="copyByClick(item, 'remark',item.id)" 
+                            @mouseover="handleMouseOver(item, 'remark')"
+                            @mouseout="handleMouseOut">
+                            {{ item?.remark }}
+                        </td>
+                        <td :data-matched="item?._matches?.numberOfUses" data-field="numberOfUses"
+                            @contextmenu="handleRightClick($event, item, 'numberOfUses')"
+                            @click="copyByClick(item, 'numberOfUses',item.id)" 
+                            @mouseover="handleMouseOver(item, 'numberOfUses')"
+                            @mouseout="handleMouseOut">
+                            {{ item?.numberOfUses }}
+                        </td>
+                        <!-- <td :data-matched="item?._matches?.updateTime" data-field="updateTime"
+                            @contextmenu="handleRightClick($event, item, 'updateTime')"
+                            @click="copyByClick(item, 'updateTime',item.id)"
+                            @mouseover="handleMouseOver(item, 'updateTime')"
+                            @mouseout="handleMouseOut">
+                            {{ item?.updateTime }}
+                        </td>
+                        <td :data-matched="item?._matches?.createTime" data-field="createTime"
+                            @contextmenu="handleRightClick($event, item, 'createTime')"
+                            @click="copyByClick(item, 'createTime',item.id)"
+                            @mouseover="handleMouseOver(item, 'createTime')" @mouseout="handleMouseOut">
+                            {{ item?.createTime }}
+                        </td> -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div v-if="contextMenuVisible" class="context-menu" :style="{
+            left: `${contextMenuPosition.x}px`,
+            top: `${contextMenuPosition.y}px`,
+        }" @click.stop>
+            <div class="menu-item" @click="deletePassword">删除</div>
+            <div class="menu-item" @click="editPassword">编辑</div>
+            <div class="menu-item" @click="copyContent">复制</div>
+        </div>
+        <div v-if="passwordMenuVisible" class="context-menu" :style="{
+            left: `${passwordMenuPosition.x}px`,
+            top: `${passwordMenuPosition.y}px`,
+        }" @click.stop>
+            <div class="menu-item" @click="randomPassword">随机</div>
+        </div>
+        <div v-if="searchMenuVisible" class="context-menu" :style="{
+            left: `${passwordMenuPosition.x}px`,
+            top: `${passwordMenuPosition.y}px`,
+        }" @click.stop>
+            <div class="menu-item" @click="pasteToSearch">粘贴</div>
+            <div class="menu-item" @click="clearSearch">清空</div>
+        </div>
+    </div>
+    <div id="promptBar">
+        {{ promptMessage }}
+    </div>
+</template>
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import {
@@ -250,9 +386,58 @@ const copyByClick = async (password: any, field: string , id:number) => {
         alert("复制失败");
     }
 };
+
+const importFromTxt = async () => {
+    try {
+        const { filePaths } = await (window as any).api.showOpenDialog({
+            properties: ["openFile"],
+            filters: [{ name: "Text Files", extensions: ["txt"] }],
+        });
+
+        if (!filePaths || filePaths.length === 0) return;
+
+        const fileContent = await importFromTxtFile(filePaths[0]);
+        const lines = fileContent.split("\n").filter((line: string) => line.trim());
+
+        let successCount = 0;
+        for (const [index, line] of lines.entries()) {
+            try {
+                const fields = line.split("\t").map((f: string) => f.trim());
+                if (fields.length !== 7) {
+                    console.error(
+                        `第${index + 1}行格式错误: 应有7个字段，实际得到${fields.length}个`
+                    );
+                    continue;
+                }
+
+                const [username, password, url, remark, updateTime, createTime, numberOfUses] = fields;
+
+                await insertPasswordFromTextFile({
+                    username: username || "",
+                    password: password || "",
+                    url: url || "",
+                    remark: remark || "from text",
+                    updateTime: updateTime || "",
+                    createTime: createTime || "",
+                    numberOfUses: numberOfUses || "0",
+                });
+                successCount++;
+            } catch (error) {
+                console.error(`导入第${index + 1}行失败:`, error);
+            }
+        }
+
+        await loadPasswords();
+        promptMessage.value = `成功导入 ${successCount}/${lines.length} 条记录`;
+    } catch (error) {
+        console.error("导入失败:", error);
+        alert("导入失败，请检查文件格式。确保使用制表符分隔字段，每行包含7个字段。");
+    }
+};
+
+
 const exportPassword = async () => {
     try {
-        // 1. 使用showSaveDialog而不是showOpenDialog
         const { filePath } = await (window as any).api.showSaveDialog({
             title: "保存密码记录",
             filters: [{ name: "Text Files", extensions: ["txt"] }],
@@ -264,13 +449,13 @@ const exportPassword = async () => {
         passwordList.value.forEach((password) => {
             content +=
                 [
-                    password.username,
-                    password.password,
-                    password.url,
-                    password.remark,
-                    password.numberOfUses,
-                    password.updateTime,
-                    password.createTime,
+                    password.username || "",
+                    password.password || "",
+                    password.url || "",
+                    password.remark || "",
+                    password.updateTime || "",
+                    password.createTime || "",
+                    password.numberOfUses || "0",
                 ].join("\t") + "\n";
         });
         exportToTxtFile(filePath, content);
@@ -283,61 +468,13 @@ const exportPassword = async () => {
     }
 };
 
+
+
 const handleClickOutside = () => {
     contextMenuVisible.value = false;
 };
 
-const importFromTxt = async () => {
-    try {
-        // 1. 打开文件选择对话框
-        const { filePaths } = await (window as any).api.showOpenDialog({
-            properties: ["openFile"],
-            filters: [{ name: "Text Files", extensions: ["txt"] }],
-        });
 
-        if (!filePaths || filePaths.length === 0) return;
-
-        // 2. 读取文件内容
-        const fileContent = await importFromTxtFile(filePaths[0]);
-        const lines = fileContent.split("\n").filter((line: string) => line.trim());
-
-        // 3. 解析并导入每条记录
-        let successCount = 0;
-        for (const [index, line] of lines.entries()) {
-            try {
-                // 严格检查每行必须有6个字段
-                const fields = line.split("\t").map((f: String) => f.trim());
-                if (fields.length !== 6) {
-                    console.error(
-                        `第${index + 1}行格式错误: 应有6个字段，实际得到${fields.length}个`
-                    );
-                    continue;
-                }
-
-                const [username, password, url, remark, updateTime, createTime] = fields;
-
-                await insertPasswordFromTextFile({
-                    username: username || "",
-                    password: password || "",
-                    url: url || "",
-                    remark: remark || "from text",
-                    updateTime: updateTime ? updateTime : "",
-                    createTime: createTime ? createTime : "",
-                });
-                successCount++;
-            } catch (error) {
-                console.error(`导入第${index + 1}行失败:`, error);
-            }
-        }
-
-        // 4. 刷新列表并显示结果
-        await loadPasswords();
-        promptMessage.value = `成功导入 ${successCount}/${lines.length} 条记录`;
-    } catch (error) {
-        console.error("导入失败:", error);
-        alert("导入失败，请检查文件格式。确保使用制表符分隔字段，每行包含6个字段。");
-    }
-};
 
 const searchKeyword = ref(""); // 添加搜索关键词
 const originalPasswordList = ref<any[]>([]); // 保存原始数据
@@ -359,8 +496,8 @@ const search = () => {
                 url: item.url?.toLowerCase().includes(keyword),
                 remark: item.remark?.toLowerCase().includes(keyword),
                 numberOfUses: item.numberOfUses?.toLowerCase().includes(keyword),
-                updateTime: item.updateTime?.toLowerCase().includes(keyword),
-                createTime: item.createTime?.toLowerCase().includes(keyword),
+                // updateTime: item.updateTime?.toLowerCase().includes(keyword),
+                // createTime: item.createTime?.toLowerCase().includes(keyword),
             };
 
             return {
@@ -383,141 +520,6 @@ onUnmounted(() => {
 
 </script>
 
-<template>
-    <div class="password-manager">
-        <div class="button-section">
-            <div class="buttons-left">
-                <button class="button0" @click="loadPasswords">刷新</button>
-                <template v-if="!showAddPasswordWindow">
-                    <button class="button0" @click="openAddPasswordWindow">添加</button>
-                </template>
-                <template v-else>
-                    <button @click="handleCancel" class="button2">取消</button>
-                    <button @click="addPassword" class="button2">
-                        {{ isEditing ? "更新" : "添加" }}
-                    </button>
-                </template>
-                <button class="button0" @click="importFromTxt">txt导入</button>
-                <button class="button0" @click="exportPassword">导出txt</button>
-            </div>
-            <div class="search-input-wrapper">
-                <input type="text" v-model="searchKeyword" placeholder="输入关键词搜索" @input="search"
-                    @contextmenu.prevent="handleSearchRightClick" @click=handleClick() />
-            </div>
-        </div>
-        <div class="add-password-window" v-if="showAddPasswordWindow">
-            <div class="window-content">
-                <h3>{{ isEditing ? "编辑密码" : "添加新密码" }}</h3>
-                <div class="input-group">
-                    <label for="username">用户名</label>
-                    <input id="username" type="text" v-model="newPassword.username" placeholder="请输入用户名" />
-                </div>
-                <div class="input-group">
-                    <label for="password">密码</label>
-                    <input id="password" type="text" v-model="newPassword.password" placeholder="请输入密码"
-                        @contextmenu.prevent="handlePasswordRightClick" />
-                </div>
-                <div class="input-group">
-                    <label for="url">网址</label>
-                    <input id="url" type="url" v-model="newPassword.url" placeholder="请输入网址 (可选)" />
-                </div>
-                <div class="input-group">
-                    <label for="remark">备注</label>
-                    <input id="remark" type="text" v-model="newPassword.remark" placeholder="请输入备注 (可选)" />
-                </div>
-            </div>
-        </div>
 
-        <div class="password-table" v-if="passwordList.length > 0">
-            <table>
-                <thead>
-                    <tr>
-                        <th>用户名</th>
-                        <th>密码</th>
-                        <th>网址</th>
-                        <th>备注</th>
-                        <th>使用次数</th>
-                        <th>更新时间</th>
-                        <th>创建时间</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in passwordList" :key="index">
-                        <td @mouseover="handleMouseOver(item, 'username')" @mouseout="handleMouseOut"
-                            :data-matched="item?._matches?.username" data-field="username"
-                            @contextmenu="handleRightClick($event, item, 'username')"
-                            @click="copyByClick(item, 'username',item.id)">
-                            {{ item?.username }}
-                        </td>
-                        <td @mouseover="handleMouseOver(item, 'password')" @mouseout="handleMouseOut"
-                            :data-matched="item?._matches?.password" data-field="password"
-                            @contextmenu="handleRightClick($event, item, 'password')"
-                            @click="copyByClick(item, 'password',item.id)">
-                            {{ item?.password }}
-                        </td>
-                        <td :data-matched="item?._matches?.url" data-field="url"
-                            @contextmenu="handleRightClick($event, item, 'url')"
-                            @click="copyByClick(item, 'url',item.id)" 
-                            @mouseover="handleMouseOver(item, 'url')"
-                            @mouseout="handleMouseOut">
-                            {{ item?.url }}
-                        </td>
-                        <td :data-matched="item?._matches?.remark" data-field="remark"
-                            @contextmenu="handleRightClick($event, item, 'remark')"
-                            @click="copyByClick(item, 'remark',item.id)" 
-                            @mouseover="handleMouseOver(item, 'remark')"
-                            @mouseout="handleMouseOut">
-                            {{ item?.remark }}
-                        </td>
-                        <td :data-matched="item?._matches?.numberOfUses" data-field="numberOfUses"
-                            @contextmenu="handleRightClick($event, item, 'numberOfUses')"
-                            @click="copyByClick(item, 'numberOfUses',item.id)" 
-                            @mouseover="handleMouseOver(item, 'numberOfUses')"
-                            @mouseout="handleMouseOut">
-                            {{ item?.numberOfUses }}
-                        </td>
-                        <td :data-matched="item?._matches?.updateTime" data-field="updateTime"
-                            @contextmenu="handleRightClick($event, item, 'updateTime')"
-                            @click="copyByClick(item, 'updateTime',item.id)"
-                            @mouseover="handleMouseOver(item, 'updateTime')"
-                            @mouseout="handleMouseOut">
-                            {{ item?.updateTime }}
-                        </td>
-                        <td :data-matched="item?._matches?.createTime" data-field="createTime"
-                            @contextmenu="handleRightClick($event, item, 'createTime')"
-                            @click="copyByClick(item, 'createTime',item.id)"
-                            @mouseover="handleMouseOver(item, 'createTime')" @mouseout="handleMouseOut">
-                            {{ item?.createTime }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div v-if="contextMenuVisible" class="context-menu" :style="{
-            left: `${contextMenuPosition.x}px`,
-            top: `${contextMenuPosition.y}px`,
-        }" @click.stop>
-            <div class="menu-item" @click="deletePassword">删除</div>
-            <div class="menu-item" @click="editPassword">编辑</div>
-            <div class="menu-item" @click="copyContent">复制</div>
-        </div>
-        <div v-if="passwordMenuVisible" class="context-menu" :style="{
-            left: `${passwordMenuPosition.x}px`,
-            top: `${passwordMenuPosition.y}px`,
-        }" @click.stop>
-            <div class="menu-item" @click="randomPassword">随机</div>
-        </div>
-        <div v-if="searchMenuVisible" class="context-menu" :style="{
-            left: `${passwordMenuPosition.x}px`,
-            top: `${passwordMenuPosition.y}px`,
-        }" @click.stop>
-            <div class="menu-item" @click="pasteToSearch">粘贴</div>
-            <div class="menu-item" @click="clearSearch">清空</div>
-        </div>
-    </div>
-    <div id="promptBar">
-        {{ promptMessage }}
-    </div>
-</template>
 
 <style scoped src="./ymain.css"></style>
